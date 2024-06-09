@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        canvas {
+            background-color: #000;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <script src="snake.js"></script>
+</body>
+</html>
+javascript
+
+// snake.js
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const scale = 20;
+const rows = canvas.height / scale;
+const columns = canvas.width / scale;
+
+let snake;
+let fruit;
+let direction = 'RIGHT';
+
+function createSnake() {
+    snake = [
+        { x: 0, y: 0 },
+        { x: scale, y: 0 },
+        { x: 2 * scale, y: 0 },
+        { x: 3 * scale, y: 0 }
+    ];
+}
+
+function createFruit() {
+    const fruitX = Math.floor(Math.random() * columns) * scale;
+    const fruitY = Math.floor(Math.random() * rows) * scale;
+    fruit = { x: fruitX, y: fruitY };
+}
+
+function drawSnake() {
+    ctx.fillStyle = '#FFFFFF';
+
+    for (let i = 0; i < snake.length; i++) {
+        ctx.fillRect(snake[i].x, snake[i].y, scale, scale);
+    }
+}
+
+function drawFruit() {
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(fruit.x, fruit.y, scale, scale);
+}
+
+function update() {
+    const headX = snake[0].x;
+    const headY = snake[0].y;
+
+    switch (direction) {
+        case 'LEFT':
+            snake[0].x = headX - scale;
+            break;
+        case 'RIGHT':
+            snake[0].x = headX + scale;
+            break;
+        case 'UP':
+            snake[0].y = headY - scale;
+            break;
+        case 'DOWN':
+            snake[0].y = headY + scale;
+            break;
+    }
+
+    if (snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height) {
+        alert('Game Over!');
+        window.location.reload();
+        return;
+    }
+
+    for (let i = 1; i < snake.length; i++) {
+        if (snake[0].x === snake[i].x && snake[0].y === snake[i].y) {
+            alert('Game Over!');
+            window.location.reload();
+            return;
+        }
+    }
+
+    if (snake[0].x === fruit.x && snake[0].y === fruit.y) {
+        createFruit();
+        snake.push({ x: snake[snake.length - 1].x, y: snake[snake.length - 1].y });
+    } else {
+        snake.pop();
+    }
+
+    drawSnake();
+    drawFruit();
+
+    requestAnimationFrame(update);
+}
+
+function changeDirection(event) {
+    const key = event.key;
+    const isUp = key === 'ArrowUp' || key === 'W';
+    const isDown = key === 'ArrowDown' || key === 'S';
+    const isLeft = key === 'ArrowLeft' || key === 'A';
+    const isRight = key === 'ArrowRight' || key === 'D';
+
+    if ((isUp && direction !== 'DOWN') || (isDown && direction !== 'UP') || (isLeft && direction !== 'RIGHT') || (isRight && direction !== 'LEFT')) {
+        direction = isUp ? 'UP' : isDown ? 'DOWN' : isLeft ? 'LEFT' : 'RIGHT';
+    }
+}
+
+document.addEventListener('keydown', changeDirection);
+createSnake();
+createFruit();
+update();
